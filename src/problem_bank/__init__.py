@@ -3,8 +3,11 @@
 from typing import List, Dict, Any
 import json
 import os
+import logging
 from datetime import datetime
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class MathProblem(BaseModel):
@@ -51,13 +54,14 @@ class ProblemBank:
 
             # Check for duplicates
             if any(p.id == problem.id for p in problems):
+                logger.warning(f"Problem with ID {problem.id} already exists")
                 return False
 
             problems.append(problem)
             self._save_problems(problems)
             return True
         except Exception as e:
-            print(f"Error adding problem: {e}")
+            logger.error(f"Error adding problem: {e}")
             return False
 
     def get_all_problems(self) -> List[MathProblem]:
@@ -67,7 +71,7 @@ class ProblemBank:
                 data = json.load(f)
                 return [MathProblem.from_dict(p) for p in data.get("problems", [])]
         except Exception as e:
-            print(f"Error reading problems: {e}")
+            logger.error(f"Error reading problems: {e}")
             return []
 
     def get_validated_problems(self) -> List[MathProblem]:

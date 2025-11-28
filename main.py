@@ -11,13 +11,36 @@ import sys
 import json
 import argparse
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agents.orchestrator_agent import MathProblemOrchestrator
+from src.agents.seed_prep_agent import prep_seeds_from_text
+from src.agents.scraper_agent import scrape_and_prep, scrape_multiple_urls, read_file_content, extract_problems_from_text
 from src.problem_bank import ProblemBank
+
+
+def check_api_key() -> Optional[str]:
+    """
+    Check if API key is set and return it.
+
+    Returns:
+        API key if found, None otherwise
+    """
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
+        print("   Please set your Gemini API key to use the application.")
+        print("\n   Example:")
+        print("   export GOOGLE_API_KEY='your-api-key-here'")
+        print("\n   You can get an API key from: https://makersuite.google.com/app/apikey")
+    return api_key
 
 
 def load_seed_problems(file_path: str = "examples/seed_problems.json") -> List[Dict]:
@@ -81,12 +104,7 @@ def run_generator(args):
     display_banner()
 
     # Check for API key
-    if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
-        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
-        print("   Please set your Gemini API key to use the generator.")
-        print("\n   Example:")
-        print("   export GOOGLE_API_KEY='your-api-key-here'")
-        print("\n   You can get an API key from: https://makersuite.google.com/app/apikey")
+    if not check_api_key():
         return
 
     # Load seed problems
@@ -135,6 +153,144 @@ def run_generator(args):
             print(f"Score: {problem.validation_score:.2f}")
             print(f"\nProblem:\n{problem.problem_text[:200]}...")
             print("="*60)
+
+
+def run_scrape(args):
+    """Run the scraping workflow"""
+    display_banner()
+
+    # Check for API key
+    if not check_api_key():
+        return
+
+    print(f"🤖 Using model: {args.model}")
+    print(f"📤 Output will be saved to: {args.output}\n")
+
+    try:
+        if args.url:
+            # Scrape single URL
+            print(f"🌐 Scraping URL: {args.url}")
+            seed_json = scrape_and_prep(args.url, args.output, args.model)
+
+        elif args.urls_file:
+            # Scrape multiple URLs from file
+            print(f"📋 Loading URLs from: {args.urls_file}")
+            with open(args.urls_file, 'r') as f:
+                urls = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+
+            print(f"Found {len(urls)} URLs to scrape\n")
+            seed_json = scrape_multiple_urls(urls, args.output, args.model)
+
+        elif args.file:
+            # Extract from local file
+            print(f"📄 Reading file: {args.file}")
+            text = read_file_content(args.file)
+
+            print("🔍 Extracting problems from file...")
+            problems = extract_problems_from_text(text, args.model)
+
+            if not problems:
+                print("❌ No problems found in file")
+                return
+
+            print(f"Found {len(problems)} problems")
+
+            # Parse and create seeds
+            from src.agents.seed_prep_agent import parse_natural_language_problem, create_seed_json
+            parsed = []
+            for problem in problems:
+                try:
+                    p = parse_natural_language_problem(problem, args.model)
+                    parsed.append(p)
+                except Exception as e:
+                    print(f"⚠️  Warning: Failed to parse a problem: {e}")
+                    continue
+
+            seed_json = create_seed_json(parsed, args.output)
+
+        else:
+            print("❌ Error: Must specify --url, --urls-file, or --file")
+            return
+
+        # Display results
+        print("\n" + "="*60)
+        print("✅ SCRAPING COMPLETE")
+        print("="*60)
+        print(f"Problems extracted: {len(seed_json['problems'])}")
+        print(f"Output file: {args.output}")
+        print("="*60 + "\n")
+
+        # Show summary
+        print("📊 Scraped Problems Summary:\n")
+        for i, prob in enumerate(seed_json['problems'], 1):
+            print(f"{i}. {prob['topic'].title()} - {prob['difficulty'].title()}")
+            print(f"   {prob['problem'][:80]}...")
+            print()
+
+        print(f"\n💡 Next step: Generate problems from these seeds:")
+        print(f"   python main.py generate --seeds {args.output}")
+
+    except Exception as e:
+        print(f"\n❌ Error during scraping: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+def run_prep(args):
+    """Run the seed preparation workflow"""
+    display_banner()
+
+    # Check for API key
+    if not check_api_key():
+        return
+
+    # Get input text
+    if args.text:
+        # Direct text input
+        input_text = args.input
+        print(f"📝 Processing direct text input...")
+    else:
+        # File input
+        try:
+            with open(args.input, 'r') as f:
+                input_text = f.read()
+            print(f"📖 Loaded problems from: {args.input}")
+        except FileNotFoundError:
+            print(f"❌ Error: File not found: {args.input}")
+            return
+        except Exception as e:
+            print(f"❌ Error reading file: {e}")
+            return
+
+    print(f"🤖 Using model: {args.model}")
+    print(f"📤 Output will be saved to: {args.output}\n")
+
+    try:
+        # Run seed preparation
+        seed_json = prep_seeds_from_text(input_text, args.output, args.model)
+
+        # Display results
+        print("\n" + "="*60)
+        print("✅ SEED PREPARATION COMPLETE")
+        print("="*60)
+        print(f"Problems parsed: {len(seed_json['problems'])}")
+        print(f"Output file: {args.output}")
+        print("="*60 + "\n")
+
+        # Show summary of parsed problems
+        print("📊 Parsed Problems Summary:\n")
+        for i, prob in enumerate(seed_json['problems'], 1):
+            print(f"{i}. {prob['topic'].title()} - {prob['difficulty'].title()}")
+            print(f"   {prob['problem'][:80]}...")
+            print()
+
+        print(f"\n💡 Next step: Generate problems from these seeds:")
+        print(f"   python main.py generate --seeds {args.output}")
+
+    except Exception as e:
+        print(f"\n❌ Error during seed preparation: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def view_problems(args):
@@ -229,6 +385,54 @@ def main():
     # Stats command
     stats_parser = subparsers.add_parser("stats", help="Show problem bank statistics")
 
+    # Prep command
+    prep_parser = subparsers.add_parser("prep", help="Prepare seed problems from natural language")
+    prep_parser.add_argument(
+        "--input",
+        required=True,
+        help="Input file with natural language problems or direct text"
+    )
+    prep_parser.add_argument(
+        "--output",
+        default="examples/prepared_seeds.json",
+        help="Output JSON file (default: examples/prepared_seeds.json)"
+    )
+    prep_parser.add_argument(
+        "--text",
+        action="store_true",
+        help="Treat --input as direct text instead of file path"
+    )
+    prep_parser.add_argument(
+        "--model",
+        default="gemini-3-pro-preview",
+        help="Gemini model to use (default: gemini-3-pro-preview)"
+    )
+
+    # Scrape command
+    scrape_parser = subparsers.add_parser("scrape", help="Scrape math problems from URLs or files")
+    scrape_parser.add_argument(
+        "--url",
+        help="URL to scrape problems from"
+    )
+    scrape_parser.add_argument(
+        "--urls-file",
+        help="File containing list of URLs (one per line)"
+    )
+    scrape_parser.add_argument(
+        "--file",
+        help="Local file to extract problems from (txt, pdf, html)"
+    )
+    scrape_parser.add_argument(
+        "--output",
+        default="examples/scraped_seeds.json",
+        help="Output JSON file (default: examples/scraped_seeds.json)"
+    )
+    scrape_parser.add_argument(
+        "--model",
+        default="gemini-3-pro-preview",
+        help="Gemini model to use (default: gemini-3-pro-preview)"
+    )
+
     args = parser.parse_args()
 
     if args.command == "generate":
@@ -239,6 +443,10 @@ def main():
         display_banner()
         orchestrator = MathProblemOrchestrator()
         display_statistics(orchestrator)
+    elif args.command == "prep":
+        run_prep(args)
+    elif args.command == "scrape":
+        run_scrape(args)
     else:
         parser.print_help()
 

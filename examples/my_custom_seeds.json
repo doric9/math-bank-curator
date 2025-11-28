@@ -1,0 +1,18 @@
+{
+  "problems": [
+    {
+      "id": "custom-001",
+      "problem": "A train travels at a constant speed of 80 km/h. How far will it travel in 2.5 hours?",
+      "solution": "To find the distance, use the formula: Distance = Speed × Time\n\nGiven:\n- Speed = 80 km/h\n- Time = 2.5 hours\n\nDistance = 80 × 2.5 = 200 km\n\nTherefore, the train will travel 200 kilometers.",
+      "difficulty": "easy",
+      "topic": "algebra"
+    },
+    {
+      "id": "custom-002",
+      "problem": "Find the area of a circle with a radius of 5 cm. Use π = 3.14.",
+      "solution": "Area of a circle = πr²\n\nGiven:\n- Radius (r) = 5 cm\n- π = 3.14\n\nStep 1: Square the radius\nr² = 5² = 25 cm²\n\nStep 2: Multiply by π\nArea = 3.14 × 25 = 78.5 cm²\n\nTherefore, the area is 78.5 cm².",
+      "difficulty": "easy",
+      "topic": "geometry"
+    }
+  ]
+}
