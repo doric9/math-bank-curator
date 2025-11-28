@@ -1,0 +1,39 @@
+{
+  "problems": [
+    {
+      "id": "seed-001",
+      "problem": "A rectangular garden has a length of 12 meters and a width of 8 meters. If you want to build a fence around the entire garden, how many meters of fencing will you need?",
+      "solution": "To find the amount of fencing needed, we need to calculate the perimeter of the rectangle.\n\nPerimeter of a rectangle = 2 × (length + width)\n\nStep 1: Add length and width\n12 + 8 = 20 meters\n\nStep 2: Multiply by 2\n2 × 20 = 40 meters\n\nTherefore, you will need 40 meters of fencing.",
+      "difficulty": "easy",
+      "topic": "geometry"
+    },
+    {
+      "id": "seed-002",
+      "problem": "Sarah has $150 in her savings account. Each month, she deposits $25. How much money will she have after 6 months?",
+      "solution": "To find the total amount after 6 months, we need to add the monthly deposits to the initial amount.\n\nStep 1: Calculate total deposits\nMonthly deposit × number of months = $25 × 6 = $150\n\nStep 2: Add to initial amount\nInitial amount + total deposits = $150 + $150 = $300\n\nTherefore, Sarah will have $300 after 6 months.",
+      "difficulty": "easy",
+      "topic": "algebra"
+    },
+    {
+      "id": "seed-003",
+      "problem": "A bag contains 5 red marbles, 3 blue marbles, and 2 green marbles. If you randomly pick one marble from the bag, what is the probability of picking a blue marble?",
+      "solution": "Probability is calculated as the number of favorable outcomes divided by the total number of possible outcomes.\n\nStep 1: Find the total number of marbles\nTotal = 5 red + 3 blue + 2 green = 10 marbles\n\nStep 2: Identify favorable outcomes\nNumber of blue marbles = 3\n\nStep 3: Calculate probability\nProbability = Number of blue marbles / Total marbles\nProbability = 3/10 = 0.3 or 30%\n\nTherefore, the probability of picking a blue marble is 3/10 or 30%.",
+      "difficulty": "medium",
+      "topic": "probability"
+    },
+    {
+      "id": "seed-004",
+      "problem": "Solve for x: 3x + 7 = 22",
+      "solution": "To solve for x, we need to isolate x on one side of the equation.\n\nStep 1: Subtract 7 from both sides\n3x + 7 - 7 = 22 - 7\n3x = 15\n\nStep 2: Divide both sides by 3\n3x ÷ 3 = 15 ÷ 3\nx = 5\n\nStep 3: Verify the solution\n3(5) + 7 = 15 + 7 = 22 ✓\n\nTherefore, x = 5.",
+      "difficulty": "medium",
+      "topic": "algebra"
+    },
+    {
+      "id": "seed-005",
+      "problem": "A circle has a radius of 7 cm. What is the area of the circle? (Use π ≈ 3.14)",
+      "solution": "The area of a circle is calculated using the formula: A = πr²\n\nStep 1: Identify the radius\nr = 7 cm\n\nStep 2: Square the radius\nr² = 7² = 49 cm²\n\nStep 3: Multiply by π\nA = π × 49\nA = 3.14 × 49\nA = 153.86 cm²\n\nTherefore, the area of the circle is approximately 153.86 cm².",
+      "difficulty": "medium",
+      "topic": "geometry"
+    }
+  ]
+}

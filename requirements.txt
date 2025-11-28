@@ -1,0 +1,12 @@
+# Google Agent Development Kit
+google-adk>=1.19.0
+
+# LLM Support
+google-generativeai>=0.8.0
+
+# Data handling and validation
+pydantic>=2.0.0
+jsonschema>=4.20.0
+
+# Utilities
+python-dotenv>=1.0.0
