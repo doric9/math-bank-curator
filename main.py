@@ -17,6 +17,7 @@ from typing import List, Dict
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agents.orchestrator_agent import MathProblemOrchestrator
+from src.agents.seed_prep_agent import prep_seeds_from_text
 from src.problem_bank import ProblemBank
 
 
@@ -137,6 +138,67 @@ def run_generator(args):
             print("="*60)
 
 
+def run_prep(args):
+    """Run the seed preparation workflow"""
+    display_banner()
+
+    # Check for API key
+    if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
+        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
+        print("   Please set your Gemini API key to use the seed prep agent.")
+        print("\n   Example:")
+        print("   export GOOGLE_API_KEY='your-api-key-here'")
+        return
+
+    # Get input text
+    if args.text:
+        # Direct text input
+        input_text = args.input
+        print(f"📝 Processing direct text input...")
+    else:
+        # File input
+        try:
+            with open(args.input, 'r') as f:
+                input_text = f.read()
+            print(f"📖 Loaded problems from: {args.input}")
+        except FileNotFoundError:
+            print(f"❌ Error: File not found: {args.input}")
+            return
+        except Exception as e:
+            print(f"❌ Error reading file: {e}")
+            return
+
+    print(f"🤖 Using model: {args.model}")
+    print(f"📤 Output will be saved to: {args.output}\n")
+
+    try:
+        # Run seed preparation
+        seed_json = prep_seeds_from_text(input_text, args.output, args.model)
+
+        # Display results
+        print("\n" + "="*60)
+        print("✅ SEED PREPARATION COMPLETE")
+        print("="*60)
+        print(f"Problems parsed: {len(seed_json['problems'])}")
+        print(f"Output file: {args.output}")
+        print("="*60 + "\n")
+
+        # Show summary of parsed problems
+        print("📊 Parsed Problems Summary:\n")
+        for i, prob in enumerate(seed_json['problems'], 1):
+            print(f"{i}. {prob['topic'].title()} - {prob['difficulty'].title()}")
+            print(f"   {prob['problem'][:80]}...")
+            print()
+
+        print(f"\n💡 Next step: Generate problems from these seeds:")
+        print(f"   python main.py generate --seeds {args.output}")
+
+    except Exception as e:
+        print(f"\n❌ Error during seed preparation: {e}")
+        import traceback
+        traceback.print_exc()
+
+
 def view_problems(args):
     """View problems in the problem bank"""
     display_banner()
@@ -229,6 +291,29 @@ def main():
     # Stats command
     stats_parser = subparsers.add_parser("stats", help="Show problem bank statistics")
 
+    # Prep command
+    prep_parser = subparsers.add_parser("prep", help="Prepare seed problems from natural language")
+    prep_parser.add_argument(
+        "--input",
+        required=True,
+        help="Input file with natural language problems or direct text"
+    )
+    prep_parser.add_argument(
+        "--output",
+        default="examples/prepared_seeds.json",
+        help="Output JSON file (default: examples/prepared_seeds.json)"
+    )
+    prep_parser.add_argument(
+        "--text",
+        action="store_true",
+        help="Treat --input as direct text instead of file path"
+    )
+    prep_parser.add_argument(
+        "--model",
+        default="gemini-3-pro-preview",
+        help="Gemini model to use (default: gemini-3-pro-preview)"
+    )
+
     args = parser.parse_args()
 
     if args.command == "generate":
@@ -239,6 +324,8 @@ def main():
         display_banner()
         orchestrator = MathProblemOrchestrator()
         display_statistics(orchestrator)
+    elif args.command == "prep":
+        run_prep(args)
     else:
         parser.print_help()
 

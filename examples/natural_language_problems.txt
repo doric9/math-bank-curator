@@ -1,0 +1,17 @@
+A store is having a 25% off sale on all items. If a jacket originally costs $80, how much will it cost after the discount?
+
+Solution: To find the discounted price, first calculate 25% of $80, which is $20. Then subtract that from the original price: $80 - $20 = $60. The jacket will cost $60 after the discount.
+
+---
+
+A rectangular swimming pool is 15 meters long and 8 meters wide. What is the area of the pool?
+
+---
+
+Tom has 3 times as many marbles as Jerry. If Jerry has 12 marbles, how many marbles does Tom have?
+
+Solution: Since Tom has 3 times as many marbles as Jerry, we multiply Jerry's amount by 3. Tom has 3 × 12 = 36 marbles.
+
+---
+
+Find the value of x when 2x + 5 = 17

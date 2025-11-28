@@ -40,6 +40,7 @@ Only problems that pass rigorous validation are automatically stored in the prob
 ## Features
 
 - **Autonomous Generation**: AI agents create mathematical problems without human intervention
+- **Natural Language Input**: Seed Prep Agent converts plain text problems to JSON automatically
 - **Rigorous Validation**: Multi-criteria validation including mathematical accuracy, solution correctness, clarity, and educational value
 - **Quality Threshold**: Only problems scoring 70+ out of 100 are accepted
 - **Multi-Topic Support**: Handles algebra, geometry, probability, calculus, and more
@@ -79,6 +80,20 @@ export GOOGLE_API_KEY='your-api-key-here'
 ```
 
 ## Usage
+
+### Prepare Seeds from Natural Language (New!)
+
+Convert natural language problems to JSON format:
+
+```bash
+# From a text file
+python main.py prep --input examples/natural_language_problems.txt
+
+# Or direct text
+python main.py prep --text --input "What is 25% of 80?"
+```
+
+See [SEED_PREP_GUIDE.md](SEED_PREP_GUIDE.md) for complete documentation.
 
 ### Generate New Problems
 
