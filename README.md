@@ -91,7 +91,7 @@ python main.py generate --variations 3 --num-seeds 5
 Options:
 - `--variations N`: Number of variations to generate per seed (default: 3)
 - `--num-seeds N`: Number of seed problems to process (default: 5)
-- `--model MODEL`: Gemini model to use (default: gemini-2.0-flash-exp)
+- `--model MODEL`: Gemini model to use (default: gemini-3-pro-preview)
 - `--seeds FILE`: Path to seed problems JSON (default: examples/seed_problems.json)
 - `--show-samples`: Display sample generated problems at the end
 
@@ -206,7 +206,7 @@ This project is built using [Google's ADK](https://google.github.io/adk-docs/), 
 📖 Loading seed problems from: examples/seed_problems.json
 ✅ Loaded 5 seed problems
 
-🚀 Initializing orchestrator with model: gemini-2.0-flash-exp
+🚀 Initializing orchestrator with model: gemini-3-pro-preview
 
 --- Generating variation 1/3 ---
 🤖 Generator Agent: Creating new problem...
@@ -235,11 +235,24 @@ Success Rate: 80.0%
 
 ### Model Selection
 
-The system defaults to `gemini-2.0-flash-exp`, but you can specify other Gemini models:
+The system defaults to `gemini-3-pro-preview` (Google's most advanced model as of November 2025), but you can specify other Gemini models:
 
 ```bash
 python main.py generate --model gemini-1.5-pro
 ```
+
+#### Why Gemini 3 Pro?
+
+**Gemini 3 Pro** is Google's latest and most intelligent AI model (released November 2025), offering significant advantages for this application:
+
+- **State-of-the-art reasoning**: PhD-level reasoning with 37.5% on Humanity's Last Exam
+- **Exceptional mathematical accuracy**: Top scores on GPQA Diamond (91.9%)
+- **Superior multimodal understanding**: 81% on MMMU-Pro benchmark
+- **Best-in-class performance**: #1 on LMArena leaderboard (1501 Elo)
+- **Advanced agentic capabilities**: Optimized for autonomous agent workflows
+- **Dynamic thinking**: Adjusts reasoning depth based on problem complexity
+
+This makes Gemini 3 Pro ideal for both creative problem generation and rigorous validation tasks.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ from google.genai import types
 import os
 
 
-def create_generator_agent(model_name: str = "gemini-2.0-flash-exp") -> Agent:
+def create_generator_agent(model_name: str = "gemini-3-pro-preview") -> Agent:
     """
     Create the math problem generator agent.
 
@@ -63,7 +63,7 @@ Always generate problems that are:
     return agent
 
 
-def generate_problem_from_example(example_problem: str, model_name: str = "gemini-2.0-flash-exp") -> str:
+def generate_problem_from_example(example_problem: str, model_name: str = "gemini-3-pro-preview") -> str:
     """
     Generate a new problem based on an example.
 

@@ -7,7 +7,7 @@ import json
 import re
 
 
-def create_validator_agent(model_name: str = "gemini-2.0-flash-exp") -> Agent:
+def create_validator_agent(model_name: str = "gemini-3-pro-preview") -> Agent:
     """
     Create the math problem validator agent.
 
@@ -86,7 +86,7 @@ A problem PASSES if score >= 70 and has no critical mathematical errors.
     return agent
 
 
-def validate_problem(problem_text: str, solution: str, model_name: str = "gemini-2.0-flash-exp") -> Dict[str, Any]:
+def validate_problem(problem_text: str, solution: str, model_name: str = "gemini-3-pro-preview") -> Dict[str, Any]:
     """
     Validate a mathematical problem.
 

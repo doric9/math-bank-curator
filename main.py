@@ -199,8 +199,8 @@ def main():
     )
     gen_parser.add_argument(
         "--model",
-        default="gemini-2.0-flash-exp",
-        help="Gemini model to use (default: gemini-2.0-flash-exp)"
+        default="gemini-3-pro-preview",
+        help="Gemini model to use (default: gemini-3-pro-preview)"
     )
     gen_parser.add_argument(
         "--show-samples",

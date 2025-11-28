@@ -24,7 +24,7 @@ class MathProblemOrchestrator:
     4. Stores validated problems in the Problem Bank
     """
 
-    def __init__(self, model_name: str = "gemini-2.0-flash-exp"):
+    def __init__(self, model_name: str = "gemini-3-pro-preview"):
         self.model_name = model_name
         self.problem_bank = ProblemBank()
 
