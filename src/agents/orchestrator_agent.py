@@ -2,7 +2,7 @@
 
 from google.genai.adk import Agent, Runner
 from google.genai import types
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 import re
 
@@ -172,8 +172,16 @@ DIFFICULTY: {seed.get('difficulty', 'medium')}
 TOPIC: {seed.get('topic', 'mathematics')}
 """
 
-    def _parse_generated_problem(self, generated_text: str) -> Dict[str, str]:
-        """Parse the generated problem text into components"""
+    def _parse_generated_problem(self, generated_text: str) -> Optional[Dict[str, str]]:
+        """
+        Parse the generated problem text into components.
+
+        Args:
+            generated_text: Raw text from generator agent
+
+        Returns:
+            Dictionary with problem components or None if parsing fails
+        """
         result = {
             "problem": "",
             "solution": "",

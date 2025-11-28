@@ -11,7 +11,11 @@ import sys
 import json
 import argparse
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -20,6 +24,23 @@ from src.agents.orchestrator_agent import MathProblemOrchestrator
 from src.agents.seed_prep_agent import prep_seeds_from_text
 from src.agents.scraper_agent import scrape_and_prep, scrape_multiple_urls, read_file_content, extract_problems_from_text
 from src.problem_bank import ProblemBank
+
+
+def check_api_key() -> Optional[str]:
+    """
+    Check if API key is set and return it.
+
+    Returns:
+        API key if found, None otherwise
+    """
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
+        print("   Please set your Gemini API key to use the application.")
+        print("\n   Example:")
+        print("   export GOOGLE_API_KEY='your-api-key-here'")
+        print("\n   You can get an API key from: https://makersuite.google.com/app/apikey")
+    return api_key
 
 
 def load_seed_problems(file_path: str = "examples/seed_problems.json") -> List[Dict]:
@@ -83,12 +104,7 @@ def run_generator(args):
     display_banner()
 
     # Check for API key
-    if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
-        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
-        print("   Please set your Gemini API key to use the generator.")
-        print("\n   Example:")
-        print("   export GOOGLE_API_KEY='your-api-key-here'")
-        print("\n   You can get an API key from: https://makersuite.google.com/app/apikey")
+    if not check_api_key():
         return
 
     # Load seed problems
@@ -144,11 +160,7 @@ def run_scrape(args):
     display_banner()
 
     # Check for API key
-    if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
-        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
-        print("   Please set your Gemini API key to use the scraper.")
-        print("\n   Example:")
-        print("   export GOOGLE_API_KEY='your-api-key-here'")
+    if not check_api_key():
         return
 
     print(f"🤖 Using model: {args.model}")
@@ -190,7 +202,8 @@ def run_scrape(args):
                 try:
                     p = parse_natural_language_problem(problem, args.model)
                     parsed.append(p)
-                except:
+                except Exception as e:
+                    print(f"⚠️  Warning: Failed to parse a problem: {e}")
                     continue
 
             seed_json = create_seed_json(parsed, args.output)
@@ -228,11 +241,7 @@ def run_prep(args):
     display_banner()
 
     # Check for API key
-    if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
-        print("⚠️  Warning: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set.")
-        print("   Please set your Gemini API key to use the seed prep agent.")
-        print("\n   Example:")
-        print("   export GOOGLE_API_KEY='your-api-key-here'")
+    if not check_api_key():
         return
 
     # Get input text
