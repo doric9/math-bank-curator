@@ -2,12 +2,38 @@
 
 from google.genai.adk import Agent, Runner
 from google.genai import types
-from typing import Dict, Any
-import json
+from typing import Dict, Any, Optional
 import re
+import logging
+
+from src.constants import (
+    DEFAULT_MODEL,
+    VALIDATOR_TEMPERATURE,
+    VALIDATOR_TOP_P,
+    VALIDATOR_TOP_K,
+    VALIDATOR_MAX_TOKENS,
+    MIN_PASSING_SCORE,
+    VALIDATION_RESULT_PATTERN,
+    SCORE_PATTERN,
+    MATHEMATICAL_ACCURACY_PATTERN,
+    SOLUTION_CORRECTNESS_PATTERN,
+    CLARITY_COMPLETENESS_PATTERN,
+    EDUCATIONAL_VALUE_PATTERN,
+    FEEDBACK_PATTERN,
+    ISSUES_PATTERN,
+    RECOMMENDATION_PATTERN,
+    MATHEMATICAL_ACCURACY_WEIGHT,
+    SOLUTION_CORRECTNESS_WEIGHT,
+    CLARITY_COMPLETENESS_WEIGHT,
+    EDUCATIONAL_VALUE_WEIGHT,
+    MAX_SCORE
+)
+from src.utils import retry_on_exception, safe_int_extraction, safe_regex_search, sanitize_text
+
+logger = logging.getLogger(__name__)
 
 
-def create_validator_agent(model_name: str = "gemini-3-pro-preview") -> Agent:
+def create_validator_agent(model_name: str = DEFAULT_MODEL) -> Agent:
     """
     Create the math problem validator agent.
 
@@ -24,28 +50,28 @@ def create_validator_agent(model_name: str = "gemini-3-pro-preview") -> Agent:
         Configured ADK Agent
     """
 
-    instructions = """You are a mathematical problem validation agent.
+    instructions = f"""You are a mathematical problem validation agent.
 
 Your role is to rigorously validate mathematical problems for accuracy, completeness, and quality.
 
 For each problem, evaluate:
 
-1. MATHEMATICAL ACCURACY (40 points)
+1. MATHEMATICAL ACCURACY ({MATHEMATICAL_ACCURACY_WEIGHT} points)
    - Is the problem mathematically sound?
    - Are there any logical errors or contradictions?
    - Is the solution method correct?
 
-2. SOLUTION CORRECTNESS (30 points)
+2. SOLUTION CORRECTNESS ({SOLUTION_CORRECTNESS_WEIGHT} points)
    - Is the final answer correct?
    - Are all steps in the solution valid?
    - Is the reasoning clear and logical?
 
-3. CLARITY & COMPLETENESS (20 points)
+3. CLARITY & COMPLETENESS ({CLARITY_COMPLETENESS_WEIGHT} points)
    - Is the problem statement clear and unambiguous?
    - Does it contain all necessary information?
    - Is the solution well-explained?
 
-4. EDUCATIONAL VALUE (10 points)
+4. EDUCATIONAL VALUE ({EDUCATIONAL_VALUE_WEIGHT} points)
    - Is the problem engaging and instructive?
    - Does it promote mathematical thinking?
    - Is it appropriate for the stated difficulty level?
@@ -53,12 +79,12 @@ For each problem, evaluate:
 Provide your validation in this EXACT format:
 ---
 VALIDATION RESULT: [PASS/FAIL]
-SCORE: [0-100]
+SCORE: [0-{MAX_SCORE}]
 
-MATHEMATICAL_ACCURACY: [0-40]
-SOLUTION_CORRECTNESS: [0-30]
-CLARITY_COMPLETENESS: [0-20]
-EDUCATIONAL_VALUE: [0-10]
+MATHEMATICAL_ACCURACY: [0-{MATHEMATICAL_ACCURACY_WEIGHT}]
+SOLUTION_CORRECTNESS: [0-{SOLUTION_CORRECTNESS_WEIGHT}]
+CLARITY_COMPLETENESS: [0-{CLARITY_COMPLETENESS_WEIGHT}]
+EDUCATIONAL_VALUE: [0-{EDUCATIONAL_VALUE_WEIGHT}]
 
 FEEDBACK:
 [Detailed feedback on the problem and solution]
@@ -69,24 +95,29 @@ ISSUES:
 RECOMMENDATION: [ACCEPT/REVISE/REJECT]
 ---
 
-A problem PASSES if score >= 70 and has no critical mathematical errors.
+A problem PASSES if score >= {MIN_PASSING_SCORE} and has no critical mathematical errors.
 """
 
     agent = Agent(
         model=model_name,
         system_instruction=instructions,
         generation_config=types.GenerationConfig(
-            temperature=0.3,  # Lower temperature for consistency
-            top_p=0.9,
-            top_k=20,
-            max_output_tokens=2048,
+            temperature=VALIDATOR_TEMPERATURE,
+            top_p=VALIDATOR_TOP_P,
+            top_k=VALIDATOR_TOP_K,
+            max_output_tokens=VALIDATOR_MAX_TOKENS,
         )
     )
 
     return agent
 
 
-def validate_problem(problem_text: str, solution: str, model_name: str = "gemini-3-pro-preview") -> Dict[str, Any]:
+@retry_on_exception(max_retries=3, delay=2.0)
+def validate_problem(
+    problem_text: str,
+    solution: str,
+    model_name: str = DEFAULT_MODEL
+) -> Dict[str, Any]:
     """
     Validate a mathematical problem.
 
@@ -97,11 +128,26 @@ def validate_problem(problem_text: str, solution: str, model_name: str = "gemini
 
     Returns:
         Dictionary with validation results
-    """
-    agent = create_validator_agent(model_name)
-    runner = Runner(agent=agent)
 
-    prompt = f"""Validate this mathematical problem:
+    Raises:
+        ValueError: If inputs are invalid
+        RuntimeError: If validation fails after retries
+    """
+    # Input validation
+    if not problem_text or not problem_text.strip():
+        raise ValueError("Problem text cannot be empty")
+    if not solution or not solution.strip():
+        raise ValueError("Solution cannot be empty")
+
+    # Sanitize inputs
+    problem_text = sanitize_text(problem_text)
+    solution = sanitize_text(solution)
+
+    try:
+        agent = create_validator_agent(model_name)
+        runner = Runner(agent=agent)
+
+        prompt = f"""Validate this mathematical problem:
 
 PROBLEM:
 {problem_text}
@@ -112,12 +158,20 @@ SOLUTION:
 Provide a complete validation report following the exact format specified in your instructions.
 """
 
-    result = runner.run(prompt)
-    validation_text = result.messages[-1].content[0].text if result.messages else ""
+        result = runner.run(prompt)
+        validation_text = result.messages[-1].content[0].text if result.messages else ""
 
-    # Parse the validation result
-    parsed = parse_validation_result(validation_text)
-    return parsed
+        if not validation_text:
+            logger.error("Validator returned empty response")
+            raise RuntimeError("Validator returned empty response")
+
+        # Parse the validation result
+        parsed = parse_validation_result(validation_text)
+        return parsed
+
+    except Exception as e:
+        logger.error(f"Validation failed: {e}")
+        raise
 
 
 def parse_validation_result(validation_text: str) -> Dict[str, Any]:
@@ -144,45 +198,100 @@ def parse_validation_result(validation_text: str) -> Dict[str, Any]:
     }
 
     # Extract PASS/FAIL
-    pass_match = re.search(r'VALIDATION RESULT:\s*(PASS|FAIL)', validation_text, re.IGNORECASE)
-    if pass_match:
-        result["passed"] = pass_match.group(1).upper() == "PASS"
+    pass_result = safe_regex_search(
+        VALIDATION_RESULT_PATTERN,
+        validation_text,
+        group=1,
+        flags=re.IGNORECASE
+    )
+    if pass_result:
+        result["passed"] = pass_result.upper() == "PASS"
 
-    # Extract overall score
-    score_match = re.search(r'SCORE:\s*(\d+)', validation_text)
-    if score_match:
-        result["score"] = int(score_match.group(1))
+    # Extract scores with bounds checking
+    result["score"] = safe_int_extraction(
+        SCORE_PATTERN,
+        validation_text,
+        default=0,
+        min_value=0,
+        max_value=MAX_SCORE
+    )
 
-    # Extract component scores
-    math_acc_match = re.search(r'MATHEMATICAL_ACCURACY:\s*(\d+)', validation_text)
-    if math_acc_match:
-        result["mathematical_accuracy"] = int(math_acc_match.group(1))
+    result["mathematical_accuracy"] = safe_int_extraction(
+        MATHEMATICAL_ACCURACY_PATTERN,
+        validation_text,
+        default=0,
+        min_value=0,
+        max_value=MATHEMATICAL_ACCURACY_WEIGHT
+    )
 
-    sol_corr_match = re.search(r'SOLUTION_CORRECTNESS:\s*(\d+)', validation_text)
-    if sol_corr_match:
-        result["solution_correctness"] = int(sol_corr_match.group(1))
+    result["solution_correctness"] = safe_int_extraction(
+        SOLUTION_CORRECTNESS_PATTERN,
+        validation_text,
+        default=0,
+        min_value=0,
+        max_value=SOLUTION_CORRECTNESS_WEIGHT
+    )
 
-    clarity_match = re.search(r'CLARITY_COMPLETENESS:\s*(\d+)', validation_text)
-    if clarity_match:
-        result["clarity_completeness"] = int(clarity_match.group(1))
+    result["clarity_completeness"] = safe_int_extraction(
+        CLARITY_COMPLETENESS_PATTERN,
+        validation_text,
+        default=0,
+        min_value=0,
+        max_value=CLARITY_COMPLETENESS_WEIGHT
+    )
 
-    edu_match = re.search(r'EDUCATIONAL_VALUE:\s*(\d+)', validation_text)
-    if edu_match:
-        result["educational_value"] = int(edu_match.group(1))
+    result["educational_value"] = safe_int_extraction(
+        EDUCATIONAL_VALUE_PATTERN,
+        validation_text,
+        default=0,
+        min_value=0,
+        max_value=EDUCATIONAL_VALUE_WEIGHT
+    )
 
     # Extract feedback
-    feedback_match = re.search(r'FEEDBACK:\s*(.+?)(?=ISSUES:|$)', validation_text, re.DOTALL)
-    if feedback_match:
-        result["feedback"] = feedback_match.group(1).strip()
+    feedback = safe_regex_search(
+        FEEDBACK_PATTERN,
+        validation_text,
+        group=1,
+        default="",
+        flags=re.DOTALL
+    )
+    if feedback:
+        result["feedback"] = feedback.strip()
 
     # Extract issues
-    issues_match = re.search(r'ISSUES:\s*(.+?)(?=RECOMMENDATION:|$)', validation_text, re.DOTALL)
-    if issues_match:
-        result["issues"] = issues_match.group(1).strip()
+    issues = safe_regex_search(
+        ISSUES_PATTERN,
+        validation_text,
+        group=1,
+        default="",
+        flags=re.DOTALL
+    )
+    if issues:
+        result["issues"] = issues.strip()
 
     # Extract recommendation
-    rec_match = re.search(r'RECOMMENDATION:\s*(ACCEPT|REVISE|REJECT)', validation_text, re.IGNORECASE)
-    if rec_match:
-        result["recommendation"] = rec_match.group(1).upper()
+    recommendation = safe_regex_search(
+        RECOMMENDATION_PATTERN,
+        validation_text,
+        group=1,
+        flags=re.IGNORECASE
+    )
+    if recommendation:
+        result["recommendation"] = recommendation.upper()
+
+    # Verify score consistency
+    component_sum = (
+        result["mathematical_accuracy"] +
+        result["solution_correctness"] +
+        result["clarity_completeness"] +
+        result["educational_value"]
+    )
+
+    if abs(component_sum - result["score"]) > 5:  # Allow small discrepancy
+        logger.warning(
+            f"Score mismatch: total={result['score']}, "
+            f"components={component_sum}"
+        )
 
     return result
