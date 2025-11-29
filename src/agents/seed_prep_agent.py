@@ -1,6 +1,6 @@
 """Seed Prep Agent - Parses natural language problems into JSON format"""
 
-from google.genai.adk import Agent, Runner
+from google.adk import Agent
 from google.genai import types
 from typing import Dict, Any, List, Optional
 import json
@@ -9,7 +9,8 @@ import uuid
 from datetime import datetime
 
 from src.constants import DEFAULT_MODEL, DEFAULT_DIFFICULTY, DEFAULT_TOPIC
-from src.utils import retry_on_exception, sanitize_text, validate_difficulty
+from src.utils import retry_on_exception, sanitize_text, validate_difficulty, run_agent_sync
+from src.agent_factory import create_agent
 
 logger = logging.getLogger(__name__)
 
@@ -62,18 +63,15 @@ Rules:
 - Ensure mathematical accuracy
 """
 
-    agent = Agent(
+    return create_agent(
+        name="seed_prep",
         model=model_name,
-        system_instruction=instructions,
-        generation_config=types.GenerationConfig(
-            temperature=0.3,  # Lower for structured output
-            top_p=0.9,
-            top_k=20,
-            max_output_tokens=2048,
-        )
+        instructions=instructions,
+        temperature=0.3,
+        top_p=0.9,
+        top_k=20,
+        max_output_tokens=8192
     )
-
-    return agent
 
 
 @retry_on_exception(max_retries=3, delay=2.0)
@@ -104,7 +102,6 @@ def parse_natural_language_problem(
 
     try:
         agent = create_seed_prep_agent(model_name)
-        runner = Runner(agent=agent)
 
         prompt = f"""Parse this mathematical problem into JSON format:
 
@@ -113,8 +110,7 @@ def parse_natural_language_problem(
 Remember to output ONLY the JSON object, nothing else.
 """
 
-        result = runner.run(prompt)
-        response_text = result.messages[-1].content[0].text if result.messages else ""
+        response_text = run_agent_sync(agent, prompt)
 
         if not response_text:
             logger.error("Seed prep agent returned empty response")

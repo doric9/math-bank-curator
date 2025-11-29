@@ -1,6 +1,6 @@
 """Validator Agent - Validates mathematical problems for accuracy and quality"""
 
-from google.genai.adk import Agent, Runner
+from google.adk import Agent
 from google.genai import types
 from typing import Dict, Any, Optional
 import re
@@ -28,7 +28,8 @@ from src.constants import (
     EDUCATIONAL_VALUE_WEIGHT,
     MAX_SCORE
 )
-from src.utils import retry_on_exception, safe_int_extraction, safe_regex_search, sanitize_text
+from src.utils import retry_on_exception, safe_int_extraction, safe_regex_search, sanitize_text, run_agent_sync
+from src.agent_factory import create_agent
 
 logger = logging.getLogger(__name__)
 
@@ -98,18 +99,15 @@ RECOMMENDATION: [ACCEPT/REVISE/REJECT]
 A problem PASSES if score >= {MIN_PASSING_SCORE} and has no critical mathematical errors.
 """
 
-    agent = Agent(
+    return create_agent(
+        name="validator",
         model=model_name,
-        system_instruction=instructions,
-        generation_config=types.GenerationConfig(
-            temperature=VALIDATOR_TEMPERATURE,
-            top_p=VALIDATOR_TOP_P,
-            top_k=VALIDATOR_TOP_K,
-            max_output_tokens=VALIDATOR_MAX_TOKENS,
-        )
+        instructions=instructions,
+        temperature=VALIDATOR_TEMPERATURE,
+        top_p=VALIDATOR_TOP_P,
+        top_k=VALIDATOR_TOP_K,
+        max_output_tokens=VALIDATOR_MAX_TOKENS
     )
-
-    return agent
 
 
 @retry_on_exception(max_retries=3, delay=2.0)
@@ -145,8 +143,7 @@ def validate_problem(
 
     try:
         agent = create_validator_agent(model_name)
-        runner = Runner(agent=agent)
-
+        
         prompt = f"""Validate this mathematical problem:
 
 PROBLEM:
@@ -158,12 +155,7 @@ SOLUTION:
 Provide a complete validation report following the exact format specified in your instructions.
 """
 
-        result = runner.run(prompt)
-        validation_text = result.messages[-1].content[0].text if result.messages else ""
-
-        if not validation_text:
-            logger.error("Validator returned empty response")
-            raise RuntimeError("Validator returned empty response")
+        validation_text = run_agent_sync(agent, prompt)
 
         # Parse the validation result
         parsed = parse_validation_result(validation_text)

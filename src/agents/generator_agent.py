@@ -1,6 +1,6 @@
 """Generator Agent - Creates new math problems from examples"""
 
-from google.genai.adk import Agent, Runner
+from google.adk import Agent
 from google.genai import types
 from typing import Optional
 import logging
@@ -12,7 +12,8 @@ from src.constants import (
     GENERATOR_TOP_K,
     GENERATOR_MAX_TOKENS
 )
-from src.utils import retry_on_exception, sanitize_text
+from src.utils import retry_on_exception, sanitize_text, run_agent_sync
+from src.agent_factory import create_agent
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ When generating problems:
 3. Ensure the problem is solvable and mathematically rigorous
 4. Provide a complete, step-by-step solution
 5. Clearly state the difficulty level (easy, medium, hard) and topic
+6. If the problem involves geometry, graphs, or visual data, provide Python code (using matplotlib) to generate the diagram.
 
 Generate problems in this format:
 ---
@@ -52,6 +54,9 @@ SOLUTION:
 
 DIFFICULTY: [easy/medium/hard]
 TOPIC: [e.g., algebra, geometry, calculus, probability]
+
+DIAGRAM_CODE:
+[Optional: Python code to generate the diagram. Use 'plt.show()' at the end. If no diagram is needed, write "NONE"]
 ---
 
 Always generate problems that are:
@@ -59,20 +64,18 @@ Always generate problems that are:
 - Educational and engaging
 - Different enough from the source to be considered original
 - Complete with both problem statement and solution
+- Visually supported with code where applicable
 """
 
-    agent = Agent(
+    return create_agent(
+        name="generator",
         model=model_name,
-        system_instruction=instructions,
-        generation_config=types.GenerationConfig(
-            temperature=GENERATOR_TEMPERATURE,
-            top_p=GENERATOR_TOP_P,
-            top_k=GENERATOR_TOP_K,
-            max_output_tokens=GENERATOR_MAX_TOKENS,
-        )
+        instructions=instructions,
+        temperature=GENERATOR_TEMPERATURE,
+        top_p=GENERATOR_TOP_P,
+        top_k=GENERATOR_TOP_K,
+        max_output_tokens=GENERATOR_MAX_TOKENS
     )
-
-    return agent
 
 
 @retry_on_exception(max_retries=3, delay=2.0)
@@ -103,8 +106,7 @@ def generate_problem_from_example(
 
     try:
         agent = create_generator_agent(model_name)
-        runner = Runner(agent=agent)
-
+        
         prompt = f"""Based on this example problem, generate a NEW and ORIGINAL problem:
 
 {example_problem}
@@ -116,13 +118,7 @@ Generate a similar problem that:
 4. Includes a complete solution
 """
 
-        result = runner.run(prompt)
-        generated_text = result.messages[-1].content[0].text if result.messages else ""
-
-        if not generated_text:
-            logger.error("Generator returned empty response")
-            raise RuntimeError("Generator returned empty response")
-
+        generated_text = run_agent_sync(agent, prompt)
         return generated_text
 
     except Exception as e:

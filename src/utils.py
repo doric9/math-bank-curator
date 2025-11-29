@@ -6,6 +6,10 @@ from typing import Optional, Callable, TypeVar, Dict, Any
 from functools import wraps
 import logging
 
+from google.adk import Agent, Runner
+from google.adk.sessions.in_memory_session_service import InMemorySessionService
+from google.genai import types
+
 from src.constants import (
     MAX_RETRIES,
     RETRY_DELAY,
@@ -200,3 +204,49 @@ def safe_int_extraction(
     except (ValueError, AttributeError) as e:
         logger.error(f"Integer extraction failed: {e}")
         return default
+
+def run_agent_sync(
+    agent: Agent,
+    prompt: str | list[types.Part],
+    app_name: str = "math-bank-curator",
+    user_id: str = "user",
+    session_id: str = "session"
+) -> str:
+    """
+    Run an ADK agent synchronously and return the response text.
+    Encapsulates session creation, runner initialization, and event loop handling.
+
+    Args:
+        agent: The ADK Agent instance to run
+        prompt: The input prompt (string) or list of Parts (multimodal)
+        app_name: Application name for the session (default: "math-bank-curator")
+        user_id: User ID for the session (default: "user")
+        session_id: Session ID (default: "session")
+
+    Returns:
+        The text response from the agent
+
+    Raises:
+        RuntimeError: If the agent returns an empty response
+    """
+    session_service = InMemorySessionService()
+    session_service.create_session_sync(app_name=app_name, user_id=user_id, session_id=session_id)
+    runner = Runner(agent=agent, session_service=session_service, app_name=app_name)
+
+    if isinstance(prompt, str):
+        prompt_content = types.Content(parts=[types.Part(text=prompt)])
+    else:
+        prompt_content = types.Content(parts=prompt)
+    
+    response_text = ""
+    for event in runner.run(user_id=user_id, session_id=session_id, new_message=prompt_content):
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    response_text += part.text
+
+    if not response_text:
+        logger.error(f"Agent {agent.name} returned empty response")
+        raise RuntimeError(f"Agent {agent.name} returned empty response")
+
+    return response_text

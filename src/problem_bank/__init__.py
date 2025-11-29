@@ -22,6 +22,7 @@ class MathProblem(BaseModel):
     validated: bool = Field(default=False, description="Whether the problem has been validated")
     validation_score: float = Field(default=0.0, description="Validation score 0-1")
     source_problem_id: str = Field(default="", description="ID of the problem this was generated from")
+    diagram_code: str = Field(default="", description="Python code to generate diagram")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""

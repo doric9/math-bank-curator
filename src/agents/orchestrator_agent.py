@@ -1,6 +1,6 @@
 """Orchestrator Agent - Coordinates the multi-agent workflow"""
 
-from google.genai.adk import Agent, Runner
+from google.adk import Agent, Runner
 from google.genai import types
 from typing import List, Dict, Any, Optional
 import json
@@ -99,7 +99,8 @@ class MathProblemOrchestrator:
                         created_at=datetime.now().isoformat(),
                         validated=True,
                         validation_score=validation_result["score"] / 100,
-                        source_problem_id=results["seed_problem_id"]
+                        source_problem_id=results["seed_problem_id"],
+                        diagram_code=parsed.get("diagram_code", "")
                     )
 
                     if self.problem_bank.add_problem(problem):
@@ -205,9 +206,16 @@ TOPIC: {seed.get('topic', 'mathematics')}
             result["difficulty"] = difficulty_match.group(1).lower()
 
         # Extract topic
-        topic_match = re.search(r'TOPIC:\s*(.+?)(?=\n|$)', generated_text, re.IGNORECASE)
+        topic_match = re.search(r'TOPIC:\s*(.+?)(?=DIAGRAM_CODE:|$)', generated_text, re.IGNORECASE)
         if topic_match:
             result["topic"] = topic_match.group(1).strip()
+
+        # Extract diagram code
+        diagram_match = re.search(r'DIAGRAM_CODE:\s*(.+?)(?=---|$)', generated_text, re.DOTALL | re.IGNORECASE)
+        if diagram_match:
+            code = diagram_match.group(1).strip()
+            if code.upper() != "NONE":
+                result["diagram_code"] = code
 
         # Validate that we got the essential parts
         if not result["problem"] or not result["solution"]:

@@ -3,6 +3,10 @@
 
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def verify_api_key():
     """Check if API key is configured"""

@@ -9,13 +9,13 @@ DEFAULT_MODEL: Final[str] = "gemini-3-pro-preview"
 GENERATOR_TEMPERATURE: Final[float] = 0.9
 GENERATOR_TOP_P: Final[float] = 0.95
 GENERATOR_TOP_K: Final[int] = 40
-GENERATOR_MAX_TOKENS: Final[int] = 2048
+GENERATOR_MAX_TOKENS: Final[int] = 8192
 
 # Validation Configuration
 VALIDATOR_TEMPERATURE: Final[float] = 0.3
 VALIDATOR_TOP_P: Final[float] = 0.9
 VALIDATOR_TOP_K: Final[int] = 20
-VALIDATOR_MAX_TOKENS: Final[int] = 2048
+VALIDATOR_MAX_TOKENS: Final[int] = 8192
 
 # Validation Thresholds
 MIN_PASSING_SCORE: Final[int] = 70

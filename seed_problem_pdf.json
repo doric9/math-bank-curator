@@ -1,0 +1,11 @@
+{
+  "problems": [
+    {
+      "id": "seed-a02cb25c",
+      "problem": "Isaiah cuts open a cardboard cube along some of its edges to form the flat shape shown on the right, which has an area of 18 square centimeters. What was the volume of the cube in cubic centimeters?\n(A) 3\u221a3\n(B) 6\n(C) 9\n(D) 6\u221a3\n(E) 9\u221a3",
+      "solution": "1. Understand that a cube consists of 6 identical square faces. When the cube is cut open to form a flat shape (a net), the total area of the shape is the sum of the areas of these 6 faces.\n2. We are given that the total area of the flat shape is 18 square centimeters.\n3. Calculate the area of a single face: Area = Total Area / 6 = 18 / 6 = 3 square centimeters.\n4. Let the side length of the cube be 's'. Since the face is a square, its area is s^2. Therefore, s^2 = 3.\n5. Solve for the side length: s = \u221a3 cm.\n6. Calculate the volume of the cube using the formula V = s^3.\n7. V = (\u221a3)^3 = \u221a3 * \u221a3 * \u221a3 = 3\u221a3 cubic centimeters.\n8. This matches option (A).",
+      "difficulty": "easy",
+      "topic": "geometry"
+    }
+  ]
+}

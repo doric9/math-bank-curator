@@ -1,0 +1,18 @@
+{
+  "problems": [
+    {
+      "id": "seed-b27b7426",
+      "problem": "The eight-pointed star, shown in the figure below, is a popular quilting pattern. What percent of the entire 4\\times4 grid is covered by the star?",
+      "solution": "To find the percentage of the grid covered by the star, we can calculate the area of the star and divide it by the total area of the grid.\n\n1. **Calculate the total area of the grid:**\n   The grid is a $4 \\times 4$ square. \n   $$\\text{Total Area} = 4 \\times 4 = 16 \\text{ square units}$$ \n\n2. **Identify the unshaded area:**\n   Instead of calculating the complex shape of the star directly, it is easier to calculate the area of the unshaded (background) regions and subtract that from the total area. \n   In the standard representation of this pattern, the unshaded regions consist of 8 identical right-angled triangles. Four are located at the corners of the grid, and four are located at the indentations of the star points.\n   Each of these triangles has legs of length 1 unit (half the side of the $2 \\times 2$ quadrants or the side of a unit square).\n\n3. **Calculate the area of the unshaded triangles:**\n   The area of one right-angled triangle with base 1 and height 1 is:\n   $$\\text{Area} = \\frac{1}{2} \\times \\text{base} \\times \\text{height} = \\frac{1}{2} \\times 1 \\times 1 = 0.5 \\text{ square units}$$\n   \n   Since there are 8 such triangles:\n   $$\\text{Total Unshaded Area} = 8 \\times 0.5 = 4 \\text{ square units}$$\n\n4. **Calculate the area of the star:**\n   Subtract the unshaded area from the total area:\n   $$\\text{Area of Star} = \\text{Total Area} - \\text{Unshaded Area}$$\n   $$\\text{Area of Star} = 16 - 4 = 12 \\text{ square units}$$\n\n5. **Calculate the percentage:**\n   $$\\text{Percentage} = \\frac{\\text{Area of Star}}{\\text{Total Area}} \\times 100\\%$$\n   $$\\text{Percentage} = \\frac{12}{16} \\times 100\\%$$\n   $$\\text{Percentage} = \\frac{3}{4} \\times 100\\% = 75\\%$$\n\nThe star covers **75%** of the entire grid.",
+      "difficulty": "easy",
+      "topic": "geometry"
+    },
+    {
+      "id": "seed-fc39b3db",
+      "problem": "The Ancient Egyptian number system used specific hieroglyphs to represent powers of 10. A vertical stroke represents 1, a heel bone represents 10, a coil of rope represents 100, and a lotus flower represents 1,000. What number is represented by a collection of 2 lotus flowers, 5 coils of rope, 3 heel bones, and 4 vertical strokes?",
+      "solution": "To find the number represented by the hieroglyphs, we sum the values of the individual symbols based on the provided legend:\n\n1. **Lotus Flowers (Thousands):** There are 2 lotus flowers.\n   $2 \\times 1,000 = 2,000$\n\n2. **Coils of Rope (Hundreds):** There are 5 coils of rope.\n   $5 \\times 100 = 500$\n\n3. **Heel Bones (Tens):** There are 3 heel bones.\n   $3 \\times 10 = 30$\n\n4. **Vertical Strokes (Ones):** There are 4 vertical strokes.\n   $4 \\times 1 = 4$\n\nFinally, add the values together:\n$2,000 + 500 + 30 + 4 = 2,534$\n\nThe number represented is 2,534.",
+      "difficulty": "easy",
+      "topic": "arithmetic"
+    }
+  ]
+}

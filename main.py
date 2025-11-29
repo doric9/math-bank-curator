@@ -22,7 +22,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.agents.orchestrator_agent import MathProblemOrchestrator
 from src.agents.seed_prep_agent import prep_seeds_from_text
-from src.agents.scraper_agent import scrape_and_prep, scrape_multiple_urls, read_file_content, extract_problems_from_text
+from src.agents.scraper_agent import scrape_and_prep, scrape_multiple_urls, extract_problems_from_text
+from src.file_utils import read_file_content
 from src.problem_bank import ProblemBank
 
 
@@ -184,10 +185,10 @@ def run_scrape(args):
         elif args.file:
             # Extract from local file
             print(f"📄 Reading file: {args.file}")
-            text = read_file_content(args.file)
+            content = read_file_content(args.file)
 
             print("🔍 Extracting problems from file...")
-            problems = extract_problems_from_text(text, args.model)
+            problems = extract_problems_from_text(content, args.model)
 
             if not problems:
                 print("❌ No problems found in file")
@@ -323,6 +324,10 @@ def view_problems(args):
         print(f"\nProblem:\n{problem.problem_text}")
         if args.show_solutions:
             print(f"\nSolution:\n{problem.solution}")
+        
+        if hasattr(problem, 'diagram_code') and problem.diagram_code:
+            print(f"\n🎨 Diagram Code:\n{problem.diagram_code}")
+            
         print(f"\nCreated: {problem.created_at}")
 
 
