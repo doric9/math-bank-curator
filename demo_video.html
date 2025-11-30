@@ -175,10 +175,13 @@
         .code-block {
             background: #202124;
             color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: monospace;
-            width: 400px;
+            padding: 30px;
+            border-radius: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 24px;
+            width: 500px;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             opacity: 0;
             animation: fadeIn 1s forwards;
         }
@@ -221,12 +224,13 @@
         /* Subtitles */
         #subtitles {
             position: absolute;
-            bottom: 50px;
+            bottom: 40px;
             width: 100%;
             text-align: center;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 500;
             color: #5f6368;
-            padding: 0 20px;
+            transition: all 0.3s ease;
         }
 
         .progress-bar {
@@ -252,7 +256,7 @@
                 <div class="paper" style="top:-10px; left:80px; transform: rotate(-5deg);">x²</div>
                 <div class="paper" style="top:50px; left:20px; transform: rotate(20deg);">∫</div>
             </div>
-            <h2 style="margin-top: 100px;">The Problem: Chaos & Repetition</h2>
+            <h2 style="margin-top: 100px; font-size: 36px; font-weight: 700;">The Problem: Chaos & Repetition</h2>
         </div>
 
         <!-- Scene 2 -->
@@ -273,9 +277,11 @@
             <div style="display: flex; width: 100%; height: 100%;">
                 <div
                     style="flex: 1; border-right: 2px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <div style="font-size: 60px;">🤖</div>
-                    <div style="margin-top: 20px; color: #EA4335; font-weight: bold;">Single Model</div>
-                    <div style="margin-top: 10px; font-style: italic; color: #5f6368;">"I think this is right?"</div>
+                    <div style="font-size: 80px; margin-bottom: 20px;">🤖</div>
+                    <div style="margin-top: 20px; color: #EA4335; font-weight: bold; font-size: 24px;">Single Model
+                    </div>
+                    <div style="margin-top: 15px; font-style: italic; color: #5f6368; font-size: 18px;">"I think this is
+                        right?"</div>
                 </div>
                 <div
                     style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -284,11 +290,13 @@
                         <div class="agent red">Generator</div>
                         <div class="agent green">Validator</div>
                     </div>
-                    <div style="margin-top: 20px; color: #34A853; font-weight: bold;">Agentic System</div>
-                    <div style="margin-top: 10px; font-style: italic; color: #5f6368;">"Let's verify that."</div>
+                    <div style="margin-top: 30px; color: #34A853; font-weight: bold; font-size: 24px;">Agentic System
+                    </div>
+                    <div style="margin-top: 15px; font-style: italic; color: #5f6368; font-size: 18px;">"Let's verify
+                        that."</div>
                 </div>
             </div>
-            <h3 style="position: absolute; bottom: 150px;">The Agentic Advantage</h3>
+            <h3 style="position: absolute; bottom: 140px; font-size: 32px; color: #202124;">The Agentic Advantage</h3>
         </div>
 
         <!-- Scene 4: Validation Loop -->
@@ -304,7 +312,7 @@
                     Easy"</div>
                 <div class="check-stamp" style="position: absolute; right: -50px; top: 50px;">✓</div>
             </div>
-            <h3 style="margin-top: 100px;">Collaborative Refinement</h3>
+            <h3 style="margin-top: 100px; font-size: 32px; color: #202124;">Collaborative Refinement</h3>
         </div>
 
         <!-- Scene 5: Multimodal -->
@@ -314,7 +322,7 @@
                 &nbsp;&nbsp;plt.plot([0,1,0.5,0], [0,0,1,0])<br>
                 &nbsp;&nbsp;plt.show()
             </div>
-            <h3>Multimodal: Image to Code</h3>
+            <h3 style="margin-top: 40px; font-size: 32px; color: #202124;">Multimodal: Image to Code</h3>
         </div>
 
         <!-- Scene 6: Bank -->
@@ -343,7 +351,7 @@
                         opacity="0.5" fill="none" />
                 </svg>
             </div>
-            <h3 style="margin-top: 40px;">Secure Problem Bank</h3>
+            <h3 style="margin-top: 50px; font-size: 32px; color: #202124;">Secure Problem Bank</h3>
         </div>
 
         <!-- Scene 7 -->
@@ -358,13 +366,13 @@
 
     <script>
         const scenes = [
-            { id: 'scene1', duration: 8000, text: "Creating high-quality math problems is exhausting. It's repetitive, time-consuming, and hard to scale." },
-            { id: 'scene2', duration: 7000, text: "Introducing Math Bank Curator. An autonomous agentic workflow that builds your problem bank for you." },
-            { id: 'scene3', duration: 13000, text: "Why agents? A single AI model can make mistakes. Math Bank Curator uses a multi-agent system to separate concerns. The Generator creates, the Validator critiques." },
-            { id: 'scene4', duration: 10000, text: "They collaborate. If a problem isn't perfect, the Validator rejects it. They refine it together until it meets the highest standard." },
-            { id: 'scene5', duration: 10000, text: "It's fully multimodal. It sees diagrams in PDFs and writes code to render perfect geometric figures." },
-            { id: 'scene6', duration: 8000, text: "Only the best problems make it into the bank. Ready for your students, instantly." },
-            { id: 'scene7', duration: 7000, text: "Math Bank Curator. Autonomous. Rigorous. Infinite. Powered by Gemini 3." }
+            { id: 'scene1', duration: 8000, text: "Creating high-quality math problems is exhausting. <br>It's repetitive, time-consuming, and hard to scale." },
+            { id: 'scene2', duration: 7000, text: "Introducing Math Bank Curator... <br>An autonomous agentic workflow that builds your problem bank for you." },
+            { id: 'scene3', duration: 13000, text: "Why agents? A single AI model can make mistakes.<br>Math Bank Curator uses a multi-agent system to separate concerns. <br>The Generator creates, the Validator critiques." },
+            { id: 'scene4', duration: 10000, text: "They collaborate. <br>If a problem isn't perfect, the Validator rejects it. <br>They refine it together until it meets the highest standard." },
+            { id: 'scene5', duration: 10000, text: "It's fully multimodal. <br>It sees diagrams in PDFs and writes code to render perfect geometric figures." },
+            { id: 'scene6', duration: 8000, text: "Only the best problems make it into the bank. <br>Ready for your students, instantly." },
+            { id: 'scene7', duration: 7000, text: "Math Bank Curator <br>Autonomous. Rigorous. Infinite. Powered by Gemini 3." }
         ];
 
         let currentScene = 0;
@@ -380,9 +388,8 @@
             const scene = scenes[index];
             const el = document.getElementById(scene.id);
             el.classList.add('active');
-            subtitleEl.innerText = scene.text;
+            subtitleEl.innerHTML = scene.text;
 
-            // Scene specific animations
             // Scene specific animations
             if (scene.id === 'scene4') {
                 const paper = document.getElementById('paper-pass');
