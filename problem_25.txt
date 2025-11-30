@@ -1,2 +1,0 @@
-Problem 25.
-Makayla finds all the possible ways to draw a path in a 5 × 5 diamond-shaped grid. Each path starts at the bottom of the grid and ends at the top, always moving one unit northeast or northwest. She computes the area of the region between each path and the right side of the grid. Two examples are shown in the figures below. What is the sum of the areas determined by all possible paths?
