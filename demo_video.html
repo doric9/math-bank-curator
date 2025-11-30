@@ -319,10 +319,31 @@
 
         <!-- Scene 6: Bank -->
         <div class="scene" id="scene6">
-            <div class="vault">
-                <div class="vault-door"></div>
+            <div class="vault"
+                style="width: 300px; height: 300px; display: flex; justify-content: center; align-items: center;">
+                <!-- Stylized SVG Vault Door -->
+                <svg width="250" height="250" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Outer Frame -->
+                    <circle cx="100" cy="100" r="95" fill="#5f6368" stroke="#3c4043" stroke-width="5" />
+                    <!-- Inner Door -->
+                    <circle cx="100" cy="100" r="80" fill="#bdc1c6" stroke="#7f868b" stroke-width="2" />
+                    <!-- Hinge/Bolts -->
+                    <circle cx="30" cy="50" r="5" fill="#3c4043" />
+                    <circle cx="30" cy="150" r="5" fill="#3c4043" />
+                    <circle cx="170" cy="50" r="5" fill="#3c4043" />
+                    <circle cx="170" cy="150" r="5" fill="#3c4043" />
+                    <!-- Handle Wheel -->
+                    <circle cx="100" cy="100" r="30" fill="none" stroke="#5f6368" stroke-width="8" />
+                    <line x1="100" y1="70" x2="100" y2="130" stroke="#5f6368" stroke-width="8" stroke-linecap="round" />
+                    <line x1="70" y1="100" x2="130" y2="100" stroke="#5f6368" stroke-width="8" stroke-linecap="round" />
+                    <!-- Center Hub -->
+                    <circle cx="100" cy="100" r="10" fill="#3c4043" />
+                    <!-- Shine/Reflection -->
+                    <path d="M 100 20 A 80 80 0 0 1 156 42" stroke="white" stroke-width="4" stroke-linecap="round"
+                        opacity="0.5" fill="none" />
+                </svg>
             </div>
-            <h3>Secure Problem Bank</h3>
+            <h3 style="margin-top: 40px;">Secure Problem Bank</h3>
         </div>
 
         <!-- Scene 7 -->
